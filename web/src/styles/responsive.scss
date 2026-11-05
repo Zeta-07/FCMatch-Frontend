@@ -1,0 +1,56 @@
+html,
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--ion-font-family);
+}
+
+.page-shell {
+  width: min(100%, 64rem);
+  margin-inline: auto;
+  padding: clamp(1rem, 3vw, 2.5rem);
+}
+
+.brand-mark {
+  display: block;
+  width: min(100%, 12rem);
+  height: auto;
+  margin-block: 1rem;
+  background: var(--brand-background);
+  border-radius: 1rem;
+}
+
+.muted {
+  color: var(--text-secondary);
+}
+
+.connection-state {
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+ion-button {
+  --border-radius: 0.75rem;
+  --background: var(--button-background);
+  --background-hover: var(--button-background);
+  --background-focused: var(--button-background);
+  --background-activated: var(--button-background);
+  --color: var(--color-on-primary);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-color);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
