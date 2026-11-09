@@ -1,5 +1,9 @@
 # FCMatch Frontend — Fase 0
 
+## Skills OpenCode compartidas
+
+`opencode.json` carga seis skills revisadas desde un catálogo público de Backend fijado a un commit, tanto en `web/` como en `mobile/`. No requiere copiar archivos ni configurar rutas personales. [Guía canónica, procedencia y política](https://github.com/Zeta-07/FCMatch-Backend/blob/ab1501182f034bde2c248ffea1e7205be8a3f472/docs/skills-opencode.md). La descarga inicial requiere OpenCode V2 y acceso HTTPS a GitHub; no autoriza iniciar Fase 1.
+
 La evidencia común se mantiene en el [informe versionado del backend](https://github.com/Zeta-07/FCMatch-Backend/blob/feature/fase-0/docs/fase-0-verificacion.md).
 
 Dos aplicaciones Angular + Ionic independientes: `web/` y `mobile/`. Cada una tiene su paquete, lockfile, configuración y pruebas. AdminWeb vive en su propio repositorio.

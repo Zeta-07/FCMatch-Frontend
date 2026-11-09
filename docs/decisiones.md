@@ -1,5 +1,9 @@
 # Decisiones técnicas — Fase 0
 
+## DT-008 — Skills OpenCode compartidas y portables
+
+Se consume el catálogo HTTP de seis skills revisadas alojado en `FCMatch-Backend`, fijado a un SHA completo en `opencode.json`, junto con su política de uso. No se copian skills, lockfiles ni guías completas a este repositorio y no se usan rutas absolutas locales ni imports de aplicación entre repositorios. Tanto `web/` como `mobile/` heredan la configuración del repositorio. La configuración se puede usar desde un clon independiente con OpenCode V2 y acceso HTTPS a GitHub, sin credenciales personales para descargar el catálogo público. No cambia aplicaciones, dependencias, MCP ni permisos. Referencias: DT-007 de Backend y `docs/skills-opencode.md`; DT-007 de AdminWeb. Publicación aprobada por el propietario, Fase 1 no iniciada.
+
 ## DT-007 — Logo oficial por tema
 
 Por petición del propietario, `Logo.png` se conserva para modo claro y `Logo-modo-oscuro.png` se usa en oscuro. Ambos originales de 2752 × 1536 se copian sin transformación ni compresión a los tres clientes. El componente compartido muestra solo la imagen del tema mediante `data-theme`, sin esperar a Angular ni depender del tema del sistema; conserva el ancho de presentación y altura automática. El favicon también se actualiza al alternar y antes del primer render al recargar. `scripts/sync-design.mjs` distribuye y comprueba ambos PNG. No se generan iconos nativos ni se avanza a Fase 1. Referencia cruzada: DT-006 de `FCMatch-AdminWeb/docs/decisiones.md`.
