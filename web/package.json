@@ -1,0 +1,51 @@
+{
+  "name": "fcmatch-web",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "prestart": "node scripts/configure-env.mjs",
+    "start": "ng serve --port=4200",
+    "prebuild": "node scripts/configure-env.mjs",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "playwright test",
+    "lint": "eslint . && stylelint \"src/**/*.scss\" && node scripts/check-colors.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run lint && npm run format:check && npm run build && npm test"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=26.13.0 <27"
+  },
+  "overrides": {
+    "minimatch": "11.0.4"
+  },
+  "packageManager": "npm@12.2.1",
+  "dependencies": {
+    "@angular/common": "^22.2.0",
+    "@angular/compiler": "^22.2.0",
+    "@angular/core": "^22.2.0",
+    "@angular/forms": "^22.2.0",
+    "@angular/platform-browser": "^22.2.0",
+    "@angular/router": "^22.2.0",
+    "@ionic/angular": "^9.0.10",
+    "ionicons": "^8.1.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^22.2.6",
+    "@angular/cli": "^22.2.6",
+    "@angular/compiler-cli": "^22.2.0",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.1",
+    "angular-eslint": "^22.6.0",
+    "eslint": "^10.14.0",
+    "postcss-scss": "^4.0.9",
+    "prettier": "^3.8.1",
+    "stylelint": "^18.0.0",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8.72.1"
+  }
+}
