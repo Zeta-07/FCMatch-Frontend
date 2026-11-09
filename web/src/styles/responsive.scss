@@ -16,12 +16,16 @@ body {
   width: min(100%, 12rem);
   height: auto;
   margin-block: 1rem;
-  background: var(--brand-background);
   border-radius: 1rem;
 }
 
 .muted {
   color: var(--text-secondary);
+}
+
+:root:not([data-theme='light']) .brand-mark-light,
+:root[data-theme='light'] .brand-mark-dark {
+  display: none;
 }
 
 .connection-state {

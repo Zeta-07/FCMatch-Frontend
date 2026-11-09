@@ -12,6 +12,8 @@ const targets =
     ? [resolve(args[targetIndex + 1])]
     : [resolve(root, 'web'), resolve(root, 'mobile')];
 const mappings = [
+  ['web/public/assets/branding/Logo.png', 'public/assets/branding/Logo.png'],
+  ['web/public/assets/branding/Logo-modo-oscuro.png', 'public/assets/branding/Logo-modo-oscuro.png'],
   ['web/src/styles/themes.scss', 'src/styles/themes.scss'],
   ['web/src/styles/responsive.scss', 'src/styles/responsive.scss'],
   ['client-tooling/eslint.config.mjs', 'eslint.config.mjs'],

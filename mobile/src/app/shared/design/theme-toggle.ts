@@ -13,6 +13,12 @@ export class ThemeToggle {
   toggle() {
     const theme = this.isLight() ? 'dark' : 'light';
     document.documentElement.dataset['theme'] = theme;
+    document
+      .querySelector<HTMLLinkElement>('link[rel="icon"]')
+      ?.setAttribute(
+        'href',
+        `assets/branding/${theme === 'light' ? 'Logo.png' : 'Logo-modo-oscuro.png'}`,
+      );
     this.isLight.set(theme === 'light');
     try {
       localStorage.setItem('fcmatch-theme', theme);

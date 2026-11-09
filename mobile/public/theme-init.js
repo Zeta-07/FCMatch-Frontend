@@ -7,4 +7,10 @@
     /* Modo privado. */
   }
   document.documentElement.dataset.theme = theme;
+  document
+    .querySelector('link[rel="icon"]')
+    ?.setAttribute(
+      'href',
+      `assets/branding/${theme === 'light' ? 'Logo.png' : 'Logo-modo-oscuro.png'}`,
+    );
 })();
