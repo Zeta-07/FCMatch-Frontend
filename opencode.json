@@ -1,5 +1,11 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "skills": [
+    "https://raw.githubusercontent.com/Zeta-07/FCMatch-Backend/ab1501182f034bde2c248ffea1e7205be8a3f472/.opencode/skills/"
+  ],
+  "instructions": [
+    "https://raw.githubusercontent.com/Zeta-07/FCMatch-Backend/ab1501182f034bde2c248ffea1e7205be8a3f472/docs/skills-policy.md"
+  ],
   "mcp": {
     "stitch": {
       "type": "remote",
