@@ -1,0 +1,59 @@
+:root,
+:root[data-theme='dark'] {
+  --bg-primary: #0b0f19;
+  --bg-surface: #1e2430;
+  --color-primary: #00ff87;
+  --color-secondary: #3b82f6;
+  --text-primary: #f9fafb;
+  --status-success: #10b981;
+  --status-warning: #f59e0b;
+  --status-danger: #ef4444;
+  --status-locked: #6b7280;
+  --text-secondary: #cbd5e1;
+  --border-color: #64748b;
+  --color-on-primary: #0b0f19;
+  --focus-color: #00ff87;
+  --button-background: #00ff87;
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --bg-primary: #f3f4f6;
+  --bg-surface: #ffffff;
+  --color-primary: #059669;
+  --color-secondary: #2563eb;
+  --text-primary: #111827;
+  --status-success: #059669;
+  --status-warning: #d97706;
+  --status-danger: #dc2626;
+  --status-locked: #6b7280;
+  --text-secondary: #475569;
+  --border-color: #64748b;
+  --color-on-primary: #ffffff;
+  --focus-color: #2563eb;
+  --button-background: #047857;
+  color-scheme: light;
+}
+
+:root {
+  --ion-font-family: system-ui, sans-serif;
+  --ion-background-color: var(--bg-primary);
+  --ion-text-color: var(--text-primary);
+  --ion-card-background: var(--bg-surface);
+  --ion-toolbar-background: var(--bg-surface);
+  --ion-toolbar-color: var(--text-primary);
+  --ion-item-background: var(--bg-surface);
+  --ion-border-color: var(--border-color);
+  --ion-color-primary: var(--color-primary);
+  --ion-color-primary-contrast: var(--color-on-primary);
+  --ion-color-primary-shade: var(--color-primary);
+  --ion-color-primary-tint: var(--color-primary);
+  --ion-color-secondary: var(--color-secondary);
+  --ion-color-success: var(--status-success);
+  --ion-color-warning: var(--status-warning);
+  --ion-color-danger: var(--status-danger);
+  --ion-color-medium: var(--status-locked);
+  --ion-color-step-50: var(--bg-surface);
+  --ion-color-step-150: var(--border-color);
+  --ion-color-step-600: var(--text-secondary);
+}

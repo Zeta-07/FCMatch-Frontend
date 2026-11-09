@@ -1,0 +1,8 @@
+node_modules
+dist
+.angular
+package-lock.json
+src/app/core/api/types.gen.ts
+test-results
+playwright-report
+public/config.json

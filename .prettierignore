@@ -1,0 +1,10 @@
+AGENTS.md
+docs/DERCAS.md
+**/node_modules
+**/dist
+**/.angular
+**/package-lock.json
+**/test-results
+**/playwright-report
+**/public/config.json
+**/src/app/core/api/types.gen.ts
