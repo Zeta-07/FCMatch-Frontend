@@ -1,5 +1,17 @@
 # Decisiones técnicas — Fase 0
 
+## DT-011 — Publicación de etapas aprobadas
+
+El propietario aprueba los resultados de Etapas 1 y 2 y autoriza sus commits/push en `feature/fase-1-identidad`, con mantenimiento separado de contrato/modelos. En adelante se pueden publicar etapas aprobadas con pruebas satisfactorias; Etapa 3 tiene autorización expresa de publicación al finalizar sus verificaciones. No se autorizan fusiones, force push, secretos o avanzar a Etapa 4. La Etapa 3 de registro/verificación corresponde a Backend; este cliente solo recibirá mantenimiento de modelos si el contrato lo requiere. Referencias: DT-011 de Backend, DT-010 de AdminWeb.
+
+## DT-010 — Excepción Angular aprobada
+
+El propietario aprueba el 11/11/2026 los resultados de Etapa 1 y conservar temporalmente Angular 22.2.4. Esto resuelve el pendiente histórico de DT-009, sin forzar 22.2.5, hacer downgrade ni modificar dependencias incompatibles. El contrato y los resultados de Etapa 1 se mantienen. Etapa 2 se limita a persistencia en Backend; no añade interfaces ni autenticación en estos clientes. Referencias: DT-010 de Backend y DT-009 de AdminWeb. No commits, push o fusiones autorizados.
+
+## DT-009 — Fase 1, Etapa 1 y mantenimiento compatible
+
+El propietario autoriza cambios locales de RF-01 a RF-06 y revisión al terminar cada etapa, sin commits/push/fusiones. Etapa 1 solo incorpora modelos generados desde el contrato objetivo del Backend; no hay pantallas, guards o autenticación implementados. SMTP local aprobado; avatares requieren R2 real de desarrollo, todavía pendiente; móvil se acepta en navegador y no acredita validación nativa/almacenamiento seguro de Fase 11. Políticas en `FCMatch-Backend/docs/fase-1-identidad.md` (DT-008/009), sin importar fuentes entre repositorios. Mantenimiento: Ionic 9.0.11, Playwright 1.65.0, Prettier 3.10.0, typescript-eslint 8.72.2 y npm 12.2.2; TS 6.0.3 conserva la excepción de peers. Angular sigue en 22.2.4: los intentos hacia 22.2.5 fallaron con ERESOLVE; una actualización global también falló por Babel no publicado. Sin downgrade, force, legacy-peer-deps, permisos de scripts ni override nuevo. La excepción temporal de Angular está pendiente de aprobación; no se declara mantenimiento completo. No cambia temas, logos o rutas. Referencia: DT-008 de AdminWeb.
+
 ## DT-008 — Skills OpenCode compartidas y portables
 
 Se consume el catálogo HTTP de seis skills revisadas alojado en `FCMatch-Backend`, fijado a un SHA completo en `opencode.json`, junto con su política de uso. No se copian skills, lockfiles ni guías completas a este repositorio y no se usan rutas absolutas locales ni imports de aplicación entre repositorios. Tanto `web/` como `mobile/` heredan la configuración del repositorio. La configuración se puede usar desde un clon independiente con OpenCode V2 y acceso HTTPS a GitHub, sin credenciales personales para descargar el catálogo público. No cambia aplicaciones, dependencias, MCP ni permisos. Referencias: DT-007 de Backend y `docs/skills-opencode.md`; DT-007 de AdminWeb. Publicación aprobada por el propietario, Fase 1 no iniciada.
