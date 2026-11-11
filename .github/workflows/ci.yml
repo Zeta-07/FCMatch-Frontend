@@ -20,7 +20,7 @@ jobs:
           node-version: '26.13.0'
           cache: npm
           cache-dependency-path: ${{ matrix.app }}/package-lock.json
-      - run: npm install --global npm@12.2.1
+      - run: npm install --global npm@12.2.2
       - run: npm ci
       - name: Verificar distribución del diseño y configuración
         run: node scripts/sync-design.mjs --check
