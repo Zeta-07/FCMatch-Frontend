@@ -1,5 +1,9 @@
 # Decisiones técnicas — Fase 0
 
+## DT-012 — Contrato de Etapa 5 sin interfaces
+
+Etapas 3–4 aprobadas y Etapa 5 autorizada en la API única: perfiles/búsqueda/cambio de correo y avatares. Este repositorio recibe solo los modelos regenerados idénticos del contrato, cuya descripción de Avatar aclara S3 local real (HTTP solo 127.0.0.1) y R2 HTTPS previsto para producción con integración real pendiente. El propietario sustituyó R2 de desarrollo para evitar tarjeta; no hay configuración S3 o secretos en los clientes. No se añaden pantallas, rutas, servicios de autenticación ni lógica de negocio. Tema/logos y Angular 22.2.4/TypeScript 6.0.3 conservados. Publicación autorizada tras verificaciones, PR #5 abierto y sin merge; Etapa 6 requiere aprobación. Referencias: Backend DT-014 e informe Etapa 5, AdminWeb DT-011. Los apartados anteriores son históricos.
+
 ## DT-011 — Publicación de etapas aprobadas
 
 El propietario aprueba los resultados de Etapas 1 y 2 y autoriza sus commits/push en `feature/fase-1-identidad`, con mantenimiento separado de contrato/modelos. En adelante se pueden publicar etapas aprobadas con pruebas satisfactorias; Etapa 3 tiene autorización expresa de publicación al finalizar sus verificaciones. No se autorizan fusiones, force push, secretos o avanzar a Etapa 4. La Etapa 3 de registro/verificación corresponde a Backend; este cliente solo recibirá mantenimiento de modelos si el contrato lo requiere. Referencias: DT-011 de Backend, DT-010 de AdminWeb.
