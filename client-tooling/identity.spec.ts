@@ -5,8 +5,10 @@ import { readFileSync } from 'node:fs';
 const mobile =
   (JSON.parse(readFileSync('package.json', 'utf8')) as { name: string }).name === 'fcmatch-mobile';
 const id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+const publicNumber = '12345678';
 const profile = {
   publicId: id,
+  publicNumber,
   username: 'JugadorDemo',
   leagueName: 'Liga Demo',
   avatar: null,
@@ -62,7 +64,8 @@ test.beforeEach(async ({ context }) => {
       (url.pathname.endsWith('/avatar') && req.method() === 'PUT')
     )
       return send(own);
-    if (url.pathname === `/api/v1/users/${id}`) return send(profile);
+    if (url.pathname === `/api/v1/users/${id}` || url.pathname === `/api/v1/users/${publicNumber}`)
+      return send(profile);
     if (/\/(register|resend-verification|forgot-password|email-change)$/.test(url.pathname))
       return send(
         {
@@ -306,15 +309,17 @@ test('apariencia: controles sincronizados y páginas cacheadas conservan el tema
   page,
 }) => {
   await page.goto('/ajustes');
-  await page.locator('main fc-theme-toggle').getByRole('button').click();
+  await expect(page.locator('main fc-theme-toggle')).toHaveCount(0);
+  await expect(page.locator('fc-theme-toggle:visible')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Activar tema claro' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   for (const toggle of await page.locator('fc-theme-toggle:visible').all())
-    await expect(toggle).toContainText('Usar tema oscuro');
+    await expect(toggle.getByRole('button')).toHaveAccessibleName('Activar tema oscuro');
   await page.getByRole('link', { name: 'Inicio de FCMatch', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Mi perfil', exact: true })).toBeVisible();
   await page
     .locator('app-profile-page')
-    .getByRole('button', { name: 'Alternar tema', exact: true })
+    .getByRole('button', { name: 'Activar tema oscuro', exact: true })
     .click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 });
@@ -339,12 +344,94 @@ test('perfil público: escape de texto y ausencia de Bearer', async ({ page }) =
   await expect(page.locator('main img')).toHaveCount(0);
 });
 
+test('ID numérico: único ID visible, copia, enlace numérico y negociación explícita', async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  const negotiated = page.waitForRequest((req) => req.url().endsWith('/users/me'));
+  await page.goto('/perfil');
+  expect((await negotiated).headers()['accept']).toBe('application/vnd.fcmatch.identity.v2+json');
+  await expect(page.locator('.public-id')).toHaveText(publicNumber);
+  await expect(page.locator('main')).not.toContainText(id);
+  await page.getByRole('button', { name: 'Copiar ID' }).click();
+  await expect(page.getByRole('status')).toHaveText('ID copiado.');
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(publicNumber);
+  await page.goto('/buscar');
+  await page.locator('ion-segment-button[value="id"]').click();
+  await field(page, 'ID público', publicNumber);
+  const exact = page.waitForRequest((req) => req.url().includes(`publicNumber=${publicNumber}`));
+  await page.getByRole('button', { name: 'Buscar', exact: true }).click();
+  expect(new URL((await exact).url()).searchParams.has('search')).toBe(false);
+  await page.getByRole('link', { name: 'Ver perfil de JugadorDemo' }).click();
+  await expect(page).toHaveURL(new RegExp(`/usuarios/${publicNumber}$`));
+  await expect(page.locator('app-profile-page .public-id')).toHaveText(publicNumber);
+  await expect(page.locator('app-profile-page main')).not.toContainText(id);
+});
+
+for (const theme of ['dark', 'light'])
+  test(`cabecera y navegación accesibles ${theme}: teclado, estado y reflujo`, async ({ page }) => {
+    await page.addInitScript((value) => localStorage.setItem('fcmatch-theme', value), theme);
+    for (const width of [320, 390, 768, 1280]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto('/ajustes');
+      const toggle = page.locator('app-settings-page fc-theme-toggle').getByRole('button');
+      await expect(toggle).toHaveAccessibleName(
+        theme === 'dark' ? 'Activar tema claro' : 'Activar tema oscuro',
+      );
+      await expect(toggle).toHaveAttribute(
+        'aria-description',
+        `Tema actual: ${theme === 'dark' ? 'oscuro' : 'claro'}`,
+      );
+      await expect(page.locator('app-settings-page fc-theme-toggle ion-icon')).toHaveAttribute(
+        'aria-hidden',
+        'true',
+      );
+      await expect(page.locator('main fc-theme-toggle')).toHaveCount(0);
+      const box = await toggle.boundingBox();
+      expect(box!.width).toBeGreaterThanOrEqual(44);
+      expect(box!.height).toBeGreaterThanOrEqual(44);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1);
+      expect(
+        await page.locator('ion-header').evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+      ).toBe(true);
+      if (!mobile)
+        await expect(
+          page.getByRole('navigation', { name: 'Principal' }).locator('[aria-current="page"]'),
+        ).toHaveText('Ajustes');
+      await toggle.focus();
+      await page.keyboard.press('Enter');
+      await expect(page.locator('html')).toHaveAttribute(
+        'data-theme',
+        theme === 'dark' ? 'light' : 'dark',
+      );
+      await page.keyboard.press('Space');
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+    }
+  });
+
 for (const theme of ['dark', 'light'])
   test(`responsivo y contraste ${theme}: 320 px y ampliación CSS al 200 %`, async ({ page }) => {
     await page.addInitScript((value) => localStorage.setItem('fcmatch-theme', value), theme);
     await page.setViewportSize({ width: 320, height: 844 });
     await page.goto('/registro');
     await expect(page.getByRole('heading', { name: 'Crear cuenta', exact: true })).toBeVisible();
+    const actualControl = await page
+      .locator('ion-input')
+      .first()
+      .evaluate((el) => {
+        const style = getComputedStyle(el);
+        const root = getComputedStyle(document.documentElement);
+        return {
+          border: style.getPropertyValue('--border-color').trim(),
+          expected: root.getPropertyValue('--border-color').trim(),
+          radius: style.getPropertyValue('--border-radius').trim(),
+          font: style.fontFamily,
+        };
+      });
+    expect(actualControl.border).toBe(actualControl.expected);
+    expect(actualControl.radius).toBe('0.75rem');
+    expect(actualControl.font).toContain('system-ui');
     expect(await page.locator('main').evaluate((e) => e.scrollWidth <= e.clientWidth + 1)).toBe(
       true,
     );
@@ -380,6 +467,33 @@ for (const theme of ['dark', 'light'])
     expect(ratios[1]).toBeGreaterThanOrEqual(4.5);
     expect(ratios[2]).toBeGreaterThanOrEqual(4.5);
     expect(ratios[3]).toBeGreaterThanOrEqual(3);
+    const actionContrast = await page.evaluate(() => {
+      const css = getComputedStyle(document.documentElement);
+      const luminance = (color: string) => {
+        const sample = document.createElement('span');
+        sample.style.color = color;
+        document.body.append(sample);
+        const rgb = getComputedStyle(sample)
+          .color.match(/\d+(?:\.\d+)?/g)!
+          .slice(0, 3)
+          .map(Number);
+        sample.remove();
+        const v = rgb.map((c) =>
+          c / 255 <= 0.04045 ? c / 255 / 12.92 : ((c / 255 + 0.055) / 1.055) ** 2.4,
+        );
+        return v[0] * 0.2126 + v[1] * 0.7152 + v[2] * 0.0722;
+      };
+      const ratio = (a: string, b: string) => {
+        const x = luminance(a),
+          y = luminance(b);
+        return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+      };
+      return [
+        ratio(css.getPropertyValue('--nav-active'), css.getPropertyValue('--bg-subtle')),
+        ratio(css.getPropertyValue('--action-danger'), css.getPropertyValue('--bg-surface')),
+      ];
+    });
+    expect(actionContrast.every((ratio) => ratio >= 4.5)).toBe(true);
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.evaluate(() => {
       document.documentElement.style.zoom = '2';

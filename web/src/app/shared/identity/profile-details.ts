@@ -1,11 +1,12 @@
 import { Component, effect, input, signal } from '@angular/core';
-import { IonAvatar, IonButton } from '@ionic/angular';
-import type { PublicProfile } from '../../core/api/types.gen';
+import { IonAvatar, IonButton, IonIcon } from '@ionic/angular';
+import { copyOutline } from 'ionicons/icons';
+import type { NumericPublicProfile } from '../../core/api/types.gen';
 import { safeAvatar } from './validators';
 
 @Component({
   selector: 'fc-profile-details',
-  imports: [IonAvatar, IonButton],
+  imports: [IonAvatar, IonButton, IonIcon],
   template: `@if (profile(); as p) {
     <section class="profile-summary">
       <ion-avatar>
@@ -15,31 +16,35 @@ import { safeAvatar } from './validators';
           <span aria-hidden="true">{{ initials(p) }}</span>
         }
       </ion-avatar>
-      @if (!editing()) {
-        <h2>{{ p.username }}</h2>
-        @if (p.leagueName) {
-          <p>{{ p.leagueName }}</p>
+      <div class="profile-identity">
+        @if (!editing()) {
+          <h2>{{ p.username }}</h2>
+          @if (p.leagueName) {
+            <p>{{ p.leagueName }}</p>
+          }
         }
-      }
-      <dl>
-        <dt>ID público</dt>
-        <dd class="public-id">{{ p.publicId }}</dd>
-      </dl>
-      <ion-button fill="outline" (click)="copy(p.publicId)">Copiar ID</ion-button>
+        @if (email()) {
+          <p class="profile-email">{{ email() }} <span class="private-label">Privado</span></p>
+        }
+      </div>
+      <div class="profile-id-row">
+        <dl>
+          <dt>ID público</dt>
+          <dd class="public-id">{{ p.publicNumber }}</dd>
+        </dl>
+        <ion-button fill="clear" (click)="copy(p.publicNumber)"
+          ><ion-icon slot="start" [icon]="copyIcon" aria-hidden="true" />Copiar ID</ion-button
+        >
+      </div>
       @if (copied()) {
         <p role="status">{{ copied() }}</p>
-      }
-      @if (email()) {
-        <dl>
-          <dt>Correo <span class="muted">· Privado</span></dt>
-          <dd>{{ email() }}</dd>
-        </dl>
       }
     </section>
   }`,
 })
 export class ProfileDetails {
-  readonly profile = input<PublicProfile>();
+  readonly copyIcon = copyOutline;
+  readonly profile = input<NumericPublicProfile>();
   readonly email = input('');
   readonly editing = input(false);
   readonly failed = signal(false);
@@ -50,10 +55,10 @@ export class ProfileDetails {
       this.failed.set(false);
     });
   }
-  avatar(p: PublicProfile) {
+  avatar(p: NumericPublicProfile) {
     return safeAvatar(p.avatar?.url);
   }
-  initials(p: PublicProfile) {
+  initials(p: NumericPublicProfile) {
     return [...p.username].slice(0, 2).join('').toUpperCase();
   }
   async copy(value: string) {

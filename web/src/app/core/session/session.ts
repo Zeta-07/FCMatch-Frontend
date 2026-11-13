@@ -7,7 +7,7 @@ import type {
   BrowserSession,
   CsrfContext,
   LoginRequestWritable,
-  OwnProfile,
+  NumericOwnProfile,
 } from '../api/types.gen';
 
 @Injectable({ providedIn: 'root' })
@@ -25,7 +25,7 @@ export class Session {
   private readonly channel =
     typeof BroadcastChannel === 'undefined' ? undefined : new BroadcastChannel('fcmatch-session');
   readonly authenticated = signal(false);
-  readonly profile = signal<OwnProfile | undefined>(undefined);
+  readonly profile = signal<NumericOwnProfile | undefined>(undefined);
   readonly notice = signal('');
   revision() {
     return this.version;

@@ -29,7 +29,7 @@ test('cliente real conecta con API/PostgreSQL y conserva tema en escritorio y mÃ
   expect(await logo.evaluate((image) => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(
     0,
   );
-  await page.getByRole('button', { name: 'Alternar tema' }).click();
+  await page.getByRole('button', { name: 'Activar tema claro' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   const lightBackground = await page
     .locator('ion-content')
@@ -44,7 +44,7 @@ test('cliente real conecta con API/PostgreSQL y conserva tema en escritorio y mÃ
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
   );
-  await page.getByRole('button', { name: 'Alternar tema' }).click();
+  await page.getByRole('button', { name: 'Activar tema oscuro' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   const darkBackground = await page
     .locator('ion-content')
@@ -64,7 +64,7 @@ test('logo y favicon siguen el tema al alternar y recargar sin deformar los orig
     await page.setViewportSize({ width, height: 844 });
     for (const theme of ['dark', 'light', 'dark']) {
       if ((await page.locator('html').getAttribute('data-theme')) !== theme) {
-        await page.getByRole('button', { name: 'Alternar tema' }).click();
+        await page.getByRole('button', { name: /Activar tema (claro|oscuro)/ }).click();
       }
       const source = `assets/branding/${theme === 'light' ? 'Logo.png' : 'Logo-modo-oscuro.png'}`;
       for (const reload of [false, true]) {

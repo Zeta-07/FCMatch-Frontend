@@ -16,12 +16,12 @@ import type {
   ChangePasswordRequestWritable,
   EmailChangeRequestWritable,
   EmailRequest,
-  OwnProfile,
-  PublicProfile,
+  NumericOwnProfile,
+  NumericPublicProfile,
   RegisterRequestWritable,
   ResetPasswordRequestWritable,
   UpdateProfileRequest,
-  UsersPage,
+  NumericUsersPage,
 } from './types.gen';
 
 const PROTECTED = new HttpContextToken(() => false);
@@ -92,6 +92,7 @@ export class IdentityApi {
       context: new HttpContext().set(PROTECTED, protectedRequest),
       timeout: 15000,
       cache: 'no-store' as const,
+      headers: { Accept: 'application/vnd.fcmatch.identity.v2+json' },
     };
   }
   register(body: RegisterRequestWritable) {
@@ -129,23 +130,31 @@ export class IdentityApi {
     );
   }
   own() {
-    return firstValueFrom(this.http.get<OwnProfile>(`${this.base}/users/me`, this.options(true)));
+    return firstValueFrom(
+      this.http.get<NumericOwnProfile>(`${this.base}/users/me`, this.options(true)),
+    );
   }
   patch(body: UpdateProfileRequest) {
     return firstValueFrom(
-      this.http.patch<OwnProfile>(`${this.base}/users/me`, body, this.options(true)),
+      this.http.patch<NumericOwnProfile>(`${this.base}/users/me`, body, this.options(true)),
     );
   }
   publicProfile(id: string) {
     return firstValueFrom(
-      this.http.get<PublicProfile>(`${this.base}/users/${encodeURIComponent(id)}`, this.options()),
+      this.http.get<NumericPublicProfile>(
+        `${this.base}/users/${encodeURIComponent(id)}`,
+        this.options(),
+      ),
     );
   }
-  search(search: string, cursor?: string) {
+  search(search: string, cursor?: string, byNumber = false) {
     return firstValueFrom(
-      this.http.get<UsersPage>(`${this.base}/users`, {
+      this.http.get<NumericUsersPage>(`${this.base}/users`, {
         ...this.options(true),
-        params: { search, ...(cursor ? { cursor } : {}) },
+        params: {
+          ...(byNumber ? { publicNumber: search } : { search }),
+          ...(cursor ? { cursor } : {}),
+        },
       }),
     );
   }
@@ -172,7 +181,7 @@ export class IdentityApi {
   }
   confirmEmail(body: ActionTokenRequestWritable) {
     return firstValueFrom(
-      this.http.post<OwnProfile>(
+      this.http.post<NumericOwnProfile>(
         `${this.base}/users/me/email-change/confirm`,
         body,
         this.options(true),

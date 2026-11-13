@@ -8,21 +8,21 @@ Referencia: [FCMatch — Identidad en Stitch](https://stitch.withgoogle.com/proj
 
 Cada fila cubre Web oscuro, Web claro, Móvil oscuro y Móvil claro (13 × 4). Los textos institucionales, promocionales, decorativos, etiquetas de revisión y afirmaciones de funciones inexistentes se descartan en todas las variantes. No se copian HTML, Tailwind, recursos externos ni scripts generados por Stitch.
 
-| Flujo | Ruta | Contenido funcional |
-| --- | --- | --- |
-| Acceso | `/iniciar-sesion` | Logo, título, correo, contraseña, Entrar y enlaces de cuenta |
-| Registro | `/registro` | Logo, título, usuario, correo, contraseña, Crear cuenta e Iniciar sesión |
-| Verificación | `/verificar-correo` | Acción explícita, vencimiento y reenvío mediante correo |
-| Recuperación | `/recuperar-contrasena` | Correo y Enviar enlace |
-| Restablecer contraseña | `/restablecer-contrasena` | Nueva contraseña, repetición y aviso de cierre de sesiones |
-| Cambiar contraseña | `/cambiar-contrasena` | Contraseña actual, nueva, repetición y aviso de cierre |
-| Mi perfil | `/perfil` | Datos propios reales, correo Privado, ID copiable y edición |
-| Editar perfil | `/editar-perfil` | Foto, usuario, liga opcional, ID no editable y acciones |
-| Búsqueda | `/buscar` | Usuario, ayuda mínima, resultados reales y paginación por cursor |
-| Perfil público | `/usuarios/:publicId` | Perfil real sin correo ni información de sesión |
-| Ajustes | `/ajustes` | Apariencia, Cuenta y Sesiones, sin descripciones redundantes |
-| Cambiar correo | `/cambiar-correo` | Correo actual privado, nuevo y contraseña actual |
-| Confirmar correo nuevo | `/confirmar-cambio-correo` | Confirmación explícita del titular; sesión necesaria |
+| Flujo                  | Ruta                       | Contenido funcional                                                      |
+| ---------------------- | -------------------------- | ------------------------------------------------------------------------ |
+| Acceso                 | `/iniciar-sesion`          | Logo, título, correo, contraseña, Entrar y enlaces de cuenta             |
+| Registro               | `/registro`                | Logo, título, usuario, correo, contraseña, Crear cuenta e Iniciar sesión |
+| Verificación           | `/verificar-correo`        | Acción explícita, vencimiento y reenvío mediante correo                  |
+| Recuperación           | `/recuperar-contrasena`    | Correo y Enviar enlace                                                   |
+| Restablecer contraseña | `/restablecer-contrasena`  | Nueva contraseña, repetición y aviso de cierre de sesiones               |
+| Cambiar contraseña     | `/cambiar-contrasena`      | Contraseña actual, nueva, repetición y aviso de cierre                   |
+| Mi perfil              | `/perfil`                  | Datos propios reales, correo Privado, ID copiable y edición              |
+| Editar perfil          | `/editar-perfil`           | Foto, usuario, liga opcional, ID no editable y acciones                  |
+| Búsqueda               | `/buscar`                  | Usuario, ayuda mínima, resultados reales y paginación por cursor         |
+| Perfil público         | `/usuarios/:publicId`      | Perfil real sin correo ni información de sesión                          |
+| Ajustes                | `/ajustes`                 | Cuenta y Sesiones; tema únicamente en cabecera                           |
+| Cambiar correo         | `/cambiar-correo`          | Correo actual privado, nuevo y contraseña actual                         |
+| Confirmar correo nuevo | `/confirmar-cambio-correo` | Confirmación explícita del titular; sesión necesaria                     |
 
 ## Reglas de redacción
 
@@ -43,10 +43,13 @@ Web: navegación superior. Móvil en navegador: pestañas temporales Mi perfil, 
 
 Las implementaciones y pruebas, no las afirmaciones de Stitch, determinan la accesibilidad y el comportamiento. La verificación de navegador no acredita validación Android/iOS, almacenamiento seguro nativo, correo externo o Cloudflare R2. Estas aceptaciones siguen diferidas según el plan aprobado.
 
-## Verificación ejecutada
+## Correcciones posteriores a la revisión del propietario
+
+Plan de correcciones aprobado: composición más próxima a REV4 sin copiar su HTML, botón luna/sol único en cabecera, perfil compacto y Ajustes con filas Ionic. ID público visible exclusivamente numérico de ocho dígitos; los UUID y enlaces anteriores se mantienen solo para compatibilidad. La nueva representación se solicita explícitamente por Accept; ver Backend DT-015 y Frontend DT-013. No implica aprobación visual definitiva ni autoriza Etapa 7. Las capturas actuales serán material de revisión: una baseline visual definitiva requiere aprobación del propietario, no se autoaprueba por generarla.
+
+## Verificación histórica anterior a estas correcciones
 
 - `npm run check` en `web/` y `mobile/` (lint, formato, build y Playwright): 42 pruebas en verde y 2 omitidas por diseño (aceptación real) en cada aplicación.
 - `scripts/sync-identity.mjs --check` y `scripts/sync-design.mjs --check`: fuentes de identidad y temas idénticos entre Web y Móvil; `themes.scss` coincide con el de AdminWeb.
 - Aceptación real con `FCMATCH_E2E_API_RUNNER` sobre PostgreSQL, SMTP y S3 locales: 2/2 en Web y 2/2 en Móvil. Requiere `PUBLIC_API_BASE_URL=http://localhost:3006/api/v1`; Móvil usa `FCMATCH_E2E_PORT=4301`, incluido en `CORS_ORIGINS`.
 - Las capturas de las 13 pantallas en ambos temas se generan en `test-results/` durante las pruebas y no se versionan.
-

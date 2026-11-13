@@ -2,10 +2,13 @@ import { test, expect, type Page } from '@playwright/test';
 import { fork, type ChildProcess } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { randomBytes } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 
 // Optional cross-repository acceptance: an explicit backend checkout path, never application imports.
 // All tokens/mail stay in parent/child process memory; no traces, HAR or storage-state artifacts.
 const runner = process.env['FCMATCH_E2E_API_RUNNER'];
+const mobile =
+  (JSON.parse(readFileSync('package.json', 'utf8')) as { name: string }).name === 'fcmatch-mobile';
 const prefix = `e2e_${randomBytes(10).toString('hex')}`;
 const address = `${prefix}_account@fcmatch.test`;
 const newAddress = `${prefix}_changed@fcmatch.test`;
@@ -18,6 +21,9 @@ let child: ChildProcess | undefined;
 test.use({ trace: 'off', video: 'off', screenshot: 'off' });
 
 test.describe('Aceptación con API/PostgreSQL/SMTP/S3 reales', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize({ width: mobile ? 390 : 1280, height: mobile ? 844 : 900 });
+  });
   test.skip(
     !runner,
     'Requiere FCMATCH_E2E_API_RUNNER y servicios locales; no se sustituye por mocks.',
@@ -107,6 +113,17 @@ test.describe('Aceptación con API/PostgreSQL/SMTP/S3 reales', () => {
     await page.getByRole('button', { name: 'Verificar correo', exact: true }).click();
     await expect(page.getByRole('status')).toHaveText('Correo verificado.');
     await login(page);
+    await expect(page.locator('.public-id')).toHaveText(/^[1-9][0-9]{7}$/);
+    const publicNumber = (await page.locator('.public-id').textContent())!.trim();
+    const publicResponse = await page.request.get(
+      `http://localhost:3006/api/v1/users/${publicNumber}`,
+      {
+        headers: { Accept: 'application/vnd.fcmatch.identity.v2+json' },
+      },
+    );
+    expect(publicResponse.ok()).toBe(true);
+    const legacyId = (await publicResponse.json()).publicId as string;
+    await expect(page.locator('app-profile-page main')).not.toContainText(legacyId);
     await expect(
       page.getByRole('heading', { name: 'Mi perfil', exact: true }).locator('..'),
     ).toContainText(address);
@@ -120,6 +137,7 @@ test.describe('Aceptación con API/PostgreSQL/SMTP/S3 reales', () => {
     await fill(page, 'Liga (opcional)', 'Liga de prueba');
     await page.getByRole('button', { name: 'Guardar cambios', exact: true }).click();
     await expect(page.getByRole('status')).toHaveText('Cambios guardados.');
+    await expect(page.locator('app-account-form-page .public-id')).toHaveText(publicNumber);
     await page.locator('input[type="file"]').setInputFiles({
       name: 'synthetic.png',
       mimeType: 'image/png',
@@ -135,7 +153,7 @@ test.describe('Aceptación con API/PostgreSQL/SMTP/S3 reales', () => {
     await fill(page, 'Usuario', username);
     await page.getByRole('button', { name: 'Buscar', exact: true }).click();
     await page.getByRole('link', { name: `Ver perfil de ${username}` }).click();
-    await expect(page).toHaveURL(/\/usuarios\/[^/]+$/);
+    await expect(page).toHaveURL(new RegExp(`/usuarios/${publicNumber}$`));
     await expect(
       page.locator('fc-profile-details').getByRole('heading', { name: username, exact: true }),
     ).toBeVisible();
@@ -149,7 +167,28 @@ test.describe('Aceptación con API/PostgreSQL/SMTP/S3 reales', () => {
     await expect(
       guestPage.getByRole('heading', { name: 'Perfil', exact: true }).locator('..'),
     ).not.toContainText(address);
+    await guestPage.goto(new URL(`/usuarios/${legacyId}`, publicUrl).href);
+    await expect(guestPage.locator('.public-id')).toHaveText(publicNumber);
+    await expect(guestPage.locator('main')).not.toContainText(legacyId);
+    await guestPage.setViewportSize({ width: 320, height: 844 });
+    await expect(guestPage.getByRole('link', { name: 'Inicio de FCMatch' })).toBeVisible();
+    for (const action of ['Iniciar sesión', 'Crear cuenta', 'Activar tema claro']) {
+      const box = await guestPage
+        .getByRole(action === 'Activar tema claro' ? 'button' : 'link', {
+          name: action,
+          exact: true,
+        })
+        .boundingBox();
+      expect(box!.x).toBeGreaterThanOrEqual(0);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(321);
+    }
     await guest.close();
+    await page.goto('/buscar');
+    await page.locator('ion-segment-button[value="id"]').click();
+    await fill(page, 'ID público', publicNumber);
+    await page.getByRole('button', { name: 'Buscar', exact: true }).click();
+    await page.getByRole('link', { name: `Ver perfil de ${username}` }).click();
+    await expect(page.locator('.public-id')).toHaveText(publicNumber);
     await page.goto('/cambiar-correo');
     await fill(page, 'Nuevo correo', newAddress);
     await fill(page, 'Contraseña actual', password);

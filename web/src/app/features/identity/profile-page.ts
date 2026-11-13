@@ -7,7 +7,7 @@ import { ProfileDetails } from '../../shared/identity/profile-details';
 import { Feedback } from '../../shared/identity/feedback';
 import { IdentityApi, identityError } from '../../core/api/identity-api';
 import { Session } from '../../core/session/session';
-import type { PublicProfile } from '../../core/api/types.gen';
+import type { NumericPublicProfile } from '../../core/api/types.gen';
 
 @Component({
   imports: [PageFrame, ProfileDetails, Feedback, IonButton, RouterLink],
@@ -50,7 +50,7 @@ export class ProfilePage extends AccessiblePage {
   private readonly route = inject(ActivatedRoute);
   readonly session = inject(Session);
   readonly publicView = this.route.snapshot.data['publicView'] === true;
-  readonly publicProfile = signal<PublicProfile | undefined>(undefined);
+  readonly publicProfile = signal<NumericPublicProfile | undefined>(undefined);
   readonly busy = signal(false);
   readonly error = signal('');
   async load() {

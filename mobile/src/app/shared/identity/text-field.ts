@@ -10,15 +10,21 @@ import {
   viewChild,
 } from '@angular/core';
 import type { FormValueControl, ValidationError } from '@angular/forms/signals';
-import { IonInput, IonButton } from '@ionic/angular';
+import { IonInput, IonButton, IonIcon } from '@ionic/angular';
+import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
 
 let nextField = 0;
 
 @Component({
   selector: 'fc-text-field',
-  imports: [IonInput, IonButton],
+  imports: [IonInput, IonButton, IonIcon],
   host: { '[class.invalid]': 'touched() && invalid()' },
   styles: `
+    :host ion-input {
+      --border-color: var(--ion-border-color);
+      --border-radius: 0.75rem;
+      --background: var(--bg-primary);
+    }
     :host(.invalid) ion-input {
       --border-color: var(--status-danger);
     }
@@ -59,8 +65,8 @@ let nextField = 0;
           [disabled]="disabled()"
           [attr.aria-pressed]="visible()"
           [attr.aria-label]="(visible() ? 'Ocultar ' : 'Mostrar ') + label().toLowerCase()"
-          >{{ visible() ? 'Ocultar' : 'Mostrar' }}</ion-button
-        >
+          ><ion-icon slot="icon-only" [icon]="visible() ? eyeOff : eye" aria-hidden="true"
+        /></ion-button>
       }
     </ion-input>
     @if (touched() && invalid()) {
@@ -70,6 +76,8 @@ let nextField = 0;
     }`,
 })
 export class TextField implements FormValueControl<string> {
+  readonly eye = eyeOutline;
+  readonly eyeOff = eyeOffOutline;
   readonly value = model('');
   readonly visible = signal(false);
   readonly label = input.required<string>();

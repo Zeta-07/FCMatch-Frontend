@@ -23,8 +23,8 @@ import { ActionLink } from '../../core/session/action-link';
   imports: [PageFrame, TextField, Feedback, FormField, IonButton, RouterLink],
   selector: 'app-auth-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<fc-page-frame [narrow]="true">
-    <section class="identity-card">
+  template: `<fc-page-frame [narrow]="true" [authLayout]="true">
+    <section class="identity-card auth-card">
       <h1>{{ title }}</h1>
       <form (submit)="send($event)" novalidate [attr.aria-busy]="busy()">
         @if (mode === 'register') {
@@ -41,6 +41,9 @@ import { ActionLink } from '../../core/session/action-link';
           autocomplete="email"
           [formField]="fields.email"
         />
+        @if (mode === 'login') {
+          <a class="recovery-link" routerLink="/recuperar-contrasena">¿Olvidaste tu contraseña?</a>
+        }
         @if (mode !== 'forgot') {
           <fc-text-field
             label="Contraseña"
@@ -55,7 +58,6 @@ import { ActionLink } from '../../core/session/action-link';
       </form>
       <nav class="form-links" aria-label="Acceso a la cuenta">
         @if (mode === 'login') {
-          <a routerLink="/recuperar-contrasena">¿Olvidaste tu contraseña?</a>
           <a routerLink="/registro">Crear cuenta</a>
           <a routerLink="/verificar-correo">Verificar correo</a>
         } @else {

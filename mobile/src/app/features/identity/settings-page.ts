@@ -1,37 +1,42 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { AlertController, IonButton } from '@ionic/angular';
+import { AlertController, IonButton, IonList, IonItem, IonLabel, IonIcon } from '@ionic/angular';
+import { mailOutline, lockClosedOutline, logOutOutline, warningOutline } from 'ionicons/icons';
 import { PageFrame } from '../../shared/identity/page-frame';
 import { AccessiblePage } from '../../shared/identity/accessible-page';
 import { Feedback } from '../../shared/identity/feedback';
-import { ThemeToggle } from '../../shared/design/theme-toggle';
 import { Session } from '../../core/session/session';
 import { identityError } from '../../core/api/identity-api';
 
 @Component({
-  imports: [PageFrame, Feedback, ThemeToggle, IonButton, RouterLink],
+  imports: [PageFrame, Feedback, IonButton, RouterLink, IonList, IonItem, IonLabel, IonIcon],
   selector: 'app-settings-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<fc-page-frame
     ><h1>Ajustes</h1>
-    <section class="identity-card">
-      <h2>Apariencia</h2>
-      <fc-theme-toggle />
-    </section>
-    <section class="identity-card">
+    <section class="settings-section">
       <h2>Cuenta</h2>
-      <div class="settings-actions">
-        <ion-button fill="outline" routerLink="/cambiar-correo">Cambiar correo</ion-button
-        ><ion-button fill="outline" routerLink="/cambiar-contrasena">Cambiar contraseña</ion-button>
-      </div>
+      <ion-list class="settings-list" lines="inset">
+        <ion-item routerLink="/cambiar-correo" [detail]="true"
+          ><ion-icon slot="start" [icon]="mailIcon" aria-hidden="true" /><ion-label
+            >Cambiar correo</ion-label
+          ></ion-item
+        >
+        <ion-item routerLink="/cambiar-contrasena" [detail]="true"
+          ><ion-icon slot="start" [icon]="lockIcon" aria-hidden="true" /><ion-label
+            >Cambiar contraseña</ion-label
+          ></ion-item
+        >
+      </ion-list>
     </section>
-    <section class="identity-card">
+    <section class="settings-section">
       <h2>Sesiones</h2>
       <div class="settings-actions">
         <ion-button fill="outline" (click)="logout(false)" [disabled]="busy()"
-          >Cerrar sesión</ion-button
-        ><ion-button fill="outline" (click)="confirmAll()" [disabled]="busy()"
-          >Cerrar todas las sesiones</ion-button
+          ><ion-icon slot="start" [icon]="logoutIcon" aria-hidden="true" />Cerrar sesión</ion-button
+        ><ion-button class="danger-action" fill="outline" (click)="confirmAll()" [disabled]="busy()"
+          ><ion-icon slot="start" [icon]="warningIcon" aria-hidden="true" />Cerrar todas las
+          sesiones</ion-button
         >
       </div>
     </section>
@@ -39,6 +44,10 @@ import { identityError } from '../../core/api/identity-api';
   </fc-page-frame>`,
 })
 export class SettingsPage extends AccessiblePage {
+  readonly mailIcon = mailOutline;
+  readonly lockIcon = lockClosedOutline;
+  readonly logoutIcon = logOutOutline;
+  readonly warningIcon = warningOutline;
   private readonly session = inject(Session);
   private readonly router = inject(Router);
   private readonly alerts = inject(AlertController);
