@@ -25,6 +25,9 @@ jobs:
       - name: Verificar distribución del diseño y configuración
         run: node scripts/sync-design.mjs --check
         working-directory: .
+      - name: Verificar distribución de identidad
+        run: node scripts/sync-identity.mjs --check
+        working-directory: .
       - run: npx playwright install --with-deps chromium
       - run: npm run check
         env:

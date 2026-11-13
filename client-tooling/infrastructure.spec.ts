@@ -1,4 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+
+const packageName = (JSON.parse(readFileSync('package.json', 'utf8')) as { name: string }).name;
+const infrastructurePath = packageName === 'fcmatch-admin' ? '/sistema' : '/estado';
 
 // CI de cada cliente es independiente. En local, por defecto, se usa la API real.
 if (process.env['FCMATCH_E2E_STUB_API'] === '1') {
@@ -16,7 +20,7 @@ test('cliente real conecta con API/PostgreSQL y conserva tema en escritorio y m√
 }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.goto('/');
+  await page.goto(infrastructurePath);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.getByRole('status')).toHaveText('API y PostgreSQL conectados.');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
@@ -55,7 +59,7 @@ test('cliente real conecta con API/PostgreSQL y conserva tema en escritorio y m√
 test('logo y favicon siguen el tema al alternar y recargar sin deformar los originales', async ({
   page,
 }) => {
-  await page.goto('/');
+  await page.goto(infrastructurePath);
   for (const width of [1280, 390]) {
     await page.setViewportSize({ width, height: 844 });
     for (const theme of ['dark', 'light', 'dark']) {
@@ -91,7 +95,7 @@ test('logo y favicon siguen el tema al alternar y recargar sin deformar los orig
 
 test('muestra error real si la API est√° inaccesible y permite reintentar', async ({ page }) => {
   await page.route('**/api/v1/health', (route) => route.abort());
-  await page.goto('/');
+  await page.goto(infrastructurePath);
   await expect(page.getByRole('status')).toHaveText('No se pudo conectar con la API.');
   await page.unroute('**/api/v1/health');
   await page.getByRole('button', { name: 'Comprobar conexi√≥n' }).click();

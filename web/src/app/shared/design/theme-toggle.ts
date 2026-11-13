@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, Injectable, inject, signal } from '@angular/core';
 import { IonButton } from '@ionic/angular';
 
 @Component({
@@ -8,6 +8,15 @@ import { IonButton } from '@ionic/angular';
     '<ion-button (click)="toggle()" [attr.aria-pressed]="isLight()" aria-label="Alternar tema">{{ isLight() ? "Usar tema oscuro" : "Usar tema claro" }}</ion-button>',
 })
 export class ThemeToggle {
+  private readonly state = inject(ThemeState);
+  readonly isLight = this.state.isLight;
+  toggle() {
+    this.state.toggle();
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class ThemeState {
   readonly isLight = signal(document.documentElement.dataset['theme'] === 'light');
 
   toggle() {
