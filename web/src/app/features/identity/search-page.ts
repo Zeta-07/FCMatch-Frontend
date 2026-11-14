@@ -9,7 +9,6 @@ import { Feedback } from '../../shared/identity/feedback';
 import { IdentityApi, identityError } from '../../core/api/identity-api';
 import { Session } from '../../core/session/session';
 import type { NumericPublicProfile } from '../../core/api/types.gen';
-import { CLIENT_PLATFORM } from '../../shared/identity/client-platform';
 import { SearchReturn } from '../../shared/identity/search-return';
 
 @Component({
@@ -26,9 +25,7 @@ import { SearchReturn } from '../../shared/identity/search-return';
   ],
   selector: 'app-search-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<fc-page-frame
-    [trackScroll]="platform === 'mobile'"
-    (scrollPosition)="scrollTop = $event"
+  template: `<fc-page-frame [trackScroll]="true" (scrollPosition)="scrollTop = $event"
     ><h1>Buscar usuarios</h1>
     <form class="search-form" (submit)="search($event)" novalidate>
       <fc-text-field
@@ -78,7 +75,6 @@ import { SearchReturn } from '../../shared/identity/search-return';
   </fc-page-frame>`,
 })
 export class SearchPage extends AccessiblePage {
-  readonly platform = inject(CLIENT_PLATFORM);
   private readonly searchReturn = inject(SearchReturn);
   private readonly frame = viewChild.required(PageFrame);
   private openingProfile = false;
@@ -155,14 +151,7 @@ export class SearchPage extends AccessiblePage {
     if (this.cursor()) void this.load(true);
   }
   remember(event: MouseEvent, target: string) {
-    if (
-      this.platform !== 'mobile' ||
-      event.button !== 0 ||
-      event.ctrlKey ||
-      event.metaKey ||
-      event.shiftKey ||
-      event.altKey
-    )
+    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)
       return;
     this.openingProfile = true;
     this.searchReturn.save({
@@ -176,7 +165,6 @@ export class SearchPage extends AccessiblePage {
     });
   }
   ionViewWillEnter() {
-    if (this.platform !== 'mobile') return;
     const snapshot = this.searchReturn.read();
     if (!snapshot) return;
     this.query = snapshot.query;
@@ -197,7 +185,7 @@ export class SearchPage extends AccessiblePage {
   ionViewDidLeave() {
     ++this.requestVersion;
     this.busy.set(false);
-    if (this.platform === 'mobile' && !this.openingProfile) this.searchReturn.clear();
+    if (!this.openingProfile) this.searchReturn.clear();
     this.openingProfile = false;
     this.items.set([]);
     this.cursor.set(null);

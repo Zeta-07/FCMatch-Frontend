@@ -1,5 +1,11 @@
 # Decisiones técnicas — Fase 0
 
+## DT-016 — Completar retroceso desde perfiles buscados en Web Cliente
+
+El propietario aclara que el retroceso de DT-015 también corresponde a Web Cliente. La causa era una restricción de plataforma en la captura/restauración de búsqueda y visibilidad de la flecha. Se retira esa restricción en las fuentes compartidas; Web usa la misma instantánea en memoria y el mismo ion-back-button/icono de Editar perfil ya verificados en móvil, sin nueva navegación ni estilos. Se conserva consulta enviada, borrador, resultados acumulados, cursor y scroll al volver; Mi perfil y accesos directos siguen sin retroceso añadido. El comportamiento móvil permanece equivalente. No cambian temas, formularios, API, Backend, AdminWeb ni dependencias; se conservan las excepciones aprobadas de Angular/TypeScript.
+
+Verificación local dirigida: regreso por cabecera y navegador en ambos temas a 320/768/1280px en Web y 390px en móvil; páginas/cursor, ausencia de refetch, scroll con tolerancia de 5px y Mi perfil sin flecha. Además regresiones de búsqueda, contraste, perfil público y cabecera, lint/formato/build/audit de ambos clientes. No se repite aceptación real ni baterías completas locales de módulos intactos. CI existente sin modificaciones; PR #5 abiertos sin merge ni Etapa 7.
+
 ## DT-015 — Regreso desde búsqueda y ancho de Editar perfil móvil
 
 El propietario aprueba el resto de Etapa 6 y solicita únicamente dos remates móviles, sin cierre definitivo ni Etapa 7. El perfil público abierto desde Buscar muestra retroceso Ionic con el mismo icono de Editar perfil. Se usa ion-back-button para volver en la pila de Ionic, con /buscar como destino de respaldo. No se añade retroceso a Mi perfil ni a perfiles abiertos directamente sin procedencia de búsqueda.

@@ -412,110 +412,119 @@ test('búsqueda unificada manual: Enter, Tú y paginación de la consulta enviad
 });
 
 for (const theme of ['dark', 'light']) {
-  test(`móvil: volver del perfil conserva búsqueda, páginas y desplazamiento ${theme}`, async ({
-    page,
-  }) => {
-    test.skip(!mobile, 'Regreso propio de la navegación móvil.');
-    await page.setViewportSize({ width: 390, height: 700 });
-    await page.addInitScript((value) => localStorage.setItem('fcmatch-theme', value), theme);
-    const rows = Array.from({ length: 24 }, (_, i) => ({
-      ...profile,
-      username: `Jugador${i}`,
-      publicNumber: String(12345000 + i),
-    }));
-    const queries: URL[] = [];
-    await page.route('**/api/v1/users?*', (route) => {
-      const url = new URL(route.request().url());
-      queries.push(url);
-      return route.fulfill({
-        json: {
-          items: url.searchParams.has('cursor') ? rows.slice(20) : rows.slice(0, 20),
-          nextCursor:
-            url.searchParams.get('cursor') === 'page-three'
-              ? null
-              : url.searchParams.has('cursor')
-                ? 'page-three'
-                : 'page-two',
-        },
+  for (const width of mobile ? [390] : [320, 768, 1280]) {
+    test(`volver del perfil conserva búsqueda, páginas y desplazamiento ${theme} ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 700 });
+      await page.addInitScript((value) => localStorage.setItem('fcmatch-theme', value), theme);
+      const rows = Array.from({ length: 24 }, (_, i) => ({
+        ...profile,
+        username: `Jugador${i}`,
+        publicNumber: String(12345000 + i),
+      }));
+      const queries: URL[] = [];
+      await page.route('**/api/v1/users?*', (route) => {
+        const url = new URL(route.request().url());
+        queries.push(url);
+        return route.fulfill({
+          json: {
+            items: url.searchParams.has('cursor') ? rows.slice(20) : rows.slice(0, 20),
+            nextCursor:
+              url.searchParams.get('cursor') === 'page-three'
+                ? null
+                : url.searchParams.has('cursor')
+                  ? 'page-three'
+                  : 'page-two',
+          },
+        });
       });
-    });
-    await page.route('**/api/v1/users/12345*', (route) =>
-      route.fulfill({ json: rows.find((row) => route.request().url().endsWith(row.publicNumber)) }),
-    );
-    await page.goto('/buscar');
-    await field(page, 'Usuario o ID público', 'Ju');
-    await page.getByLabel('Usuario o ID público', { exact: true }).press('Enter');
-    await page.getByRole('button', { name: 'Cargar más', exact: true }).click();
-    await expect(page.locator('app-search-page ion-item')).toHaveCount(24);
-    await field(page, 'Usuario o ID público', 'Borrador');
-    const link = page.getByRole('link', { name: 'Ver perfil de Jugador12', exact: true });
-    await link.scrollIntoViewIfNeeded();
-    const content = page.locator('app-search-page ion-content');
-    const top = await content.evaluate(
-      async (el) =>
-        (
-          await (
-            el as HTMLElement & { getScrollElement(): Promise<HTMLElement> }
-          ).getScrollElement()
-        ).scrollTop,
-    );
-    expect(top).toBeGreaterThan(100);
-    await expect
-      .poll(() =>
-        content.evaluate((el) => (el as HTMLElement & { scrollEvents: boolean }).scrollEvents),
-      )
-      .toBe(true);
-    await link.click();
-    await expect(page.locator('app-profile-page .public-id')).toHaveText(rows[12].publicNumber);
-    const back = page
-      .locator('app-profile-page ion-header')
-      .getByRole('button', { name: 'Volver', exact: true });
-    await expect(back).toBeVisible();
-    const backBox = await back.boundingBox();
-    expect(backBox!.width).toBeGreaterThanOrEqual(44);
-    expect(backBox!.height).toBeGreaterThanOrEqual(44);
-    await back.click();
-    await expect(page).toHaveURL(/\/buscar$/);
-    await expect(page.locator('app-search-page ion-item')).toHaveCount(24);
-    await expect(page.getByLabel('Usuario o ID público', { exact: true })).toHaveValue('Borrador');
-    await expect
-      .poll(() =>
-        content.evaluate(
-          async (el) =>
-            (
-              await (
-                el as HTMLElement & { getScrollElement(): Promise<HTMLElement> }
-              ).getScrollElement()
-            ).scrollTop,
-        ),
-      )
-      .toBeGreaterThan(top - 5);
-    expect(queries).toHaveLength(2);
-    expect(queries[1].searchParams.get('query')).toBe('Ju');
-    const restoredTop = await content.evaluate(
-      async (el) =>
-        (
-          await (
-            el as HTMLElement & { getScrollElement(): Promise<HTMLElement> }
-          ).getScrollElement()
-        ).scrollTop,
-    );
-    expect(Math.abs(restoredTop - top)).toBeLessThanOrEqual(5);
-    await page.getByRole('button', { name: 'Cargar más', exact: true }).click();
-    await expect(page.getByRole('button', { name: 'Cargar más', exact: true })).toHaveCount(0);
-    expect(queries[2].searchParams.get('cursor')).toBe('page-three');
-    expect(queries[2].searchParams.get('query')).toBe('Ju');
-    await page.getByRole('link', { name: 'Ver perfil de Jugador12', exact: true }).click();
-    await page.goBack();
-    await expect(page.locator('app-search-page ion-item')).toHaveCount(24);
-    expect(queries).toHaveLength(3);
-    await page.goto('/perfil');
-    await expect(
-      page
+      await page.route('**/api/v1/users/12345*', (route) =>
+        route.fulfill({
+          json: rows.find((row) => route.request().url().endsWith(row.publicNumber)),
+        }),
+      );
+      await page.goto('/buscar');
+      await field(page, 'Usuario o ID público', 'Ju');
+      await page.getByLabel('Usuario o ID público', { exact: true }).press('Enter');
+      await page.getByRole('button', { name: 'Cargar más', exact: true }).click();
+      await expect(page.locator('app-search-page ion-item')).toHaveCount(24);
+      await field(page, 'Usuario o ID público', 'Borrador');
+      const link = page.getByRole('link', { name: 'Ver perfil de Jugador12', exact: true });
+      await link.scrollIntoViewIfNeeded();
+      const content = page.locator('app-search-page ion-content');
+      const top = await content.evaluate(
+        async (el) =>
+          (
+            await (
+              el as HTMLElement & { getScrollElement(): Promise<HTMLElement> }
+            ).getScrollElement()
+          ).scrollTop,
+      );
+      expect(top).toBeGreaterThan(100);
+      await expect
+        .poll(() =>
+          content.evaluate((el) => (el as HTMLElement & { scrollEvents: boolean }).scrollEvents),
+        )
+        .toBe(true);
+      await link.click();
+      await expect(page.locator('app-profile-page .public-id')).toHaveText(rows[12].publicNumber);
+      await expect(page.locator('app-search-page')).toBeHidden();
+      const back = page
         .locator('app-profile-page ion-header')
-        .getByRole('button', { name: 'Volver', exact: true }),
-    ).toHaveCount(0);
-  });
+        .getByRole('button', { name: 'Volver', exact: true });
+      await expect(back).toBeVisible();
+      const backBox = await back.boundingBox();
+      expect(backBox!.width).toBeGreaterThanOrEqual(44);
+      expect(backBox!.height).toBeGreaterThanOrEqual(44);
+      expect(backBox!.x).toBeGreaterThanOrEqual(0);
+      expect(backBox!.x + backBox!.width).toBeLessThanOrEqual(width);
+      await page.screenshot({ path: `test-results/search-profile-back-${theme}-${width}.png` });
+      await back.click();
+      await expect(page).toHaveURL(/\/buscar$/);
+      await expect(page.locator('app-search-page ion-item')).toHaveCount(24);
+      await expect(page.getByLabel('Usuario o ID público', { exact: true })).toHaveValue(
+        'Borrador',
+      );
+      await expect
+        .poll(() =>
+          content.evaluate(
+            async (el) =>
+              (
+                await (
+                  el as HTMLElement & { getScrollElement(): Promise<HTMLElement> }
+                ).getScrollElement()
+              ).scrollTop,
+          ),
+        )
+        .toBeGreaterThan(top - 5);
+      expect(queries).toHaveLength(2);
+      expect(queries[1].searchParams.get('query')).toBe('Ju');
+      const restoredTop = await content.evaluate(
+        async (el) =>
+          (
+            await (
+              el as HTMLElement & { getScrollElement(): Promise<HTMLElement> }
+            ).getScrollElement()
+          ).scrollTop,
+      );
+      expect(Math.abs(restoredTop - top)).toBeLessThanOrEqual(5);
+      await page.getByRole('button', { name: 'Cargar más', exact: true }).click();
+      await expect(page.getByRole('button', { name: 'Cargar más', exact: true })).toHaveCount(0);
+      expect(queries[2].searchParams.get('cursor')).toBe('page-three');
+      expect(queries[2].searchParams.get('query')).toBe('Ju');
+      await page.getByRole('link', { name: 'Ver perfil de Jugador12', exact: true }).click();
+      await page.goBack();
+      await expect(page.locator('app-search-page ion-item')).toHaveCount(24);
+      expect(queries).toHaveLength(3);
+      await page.goto('/perfil');
+      await expect(
+        page
+          .locator('app-profile-page ion-header')
+          .getByRole('button', { name: 'Volver', exact: true }),
+      ).toHaveCount(0);
+    });
+  }
 
   test(`editar perfil: ancho útil y ausencia de desbordamiento ${theme}`, async ({ page }) => {
     await page.addInitScript((value) => localStorage.setItem('fcmatch-theme', value), theme);

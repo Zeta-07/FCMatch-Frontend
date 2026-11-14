@@ -1,5 +1,11 @@
 # Etapa 6 — dos remates móviles para revisión de cierre
 
+## Ampliación solicitada: retroceso también en Web Cliente
+
+El propietario aclara que el regreso desde Buscar usuarios debe funcionar también en Web. Se eliminan exclusivamente las condiciones que limitaban la instantánea/restauración y la flecha a móvil. Ambos clientes usan ahora el mecanismo existente, sin cambiar el comportamiento móvil ni añadir estilos. El alcance y resultados siguientes describen la entrega móvil anterior; esta ampliación se verifica de forma dirigida, sin repetir sus baterías completas locales ni aceptaciones reales.
+
+Pruebas dirigidas: Web 13/13 y móvil 9/9, incluyendo regreso por cabecera/navegador, conservación de consulta/borrador/páginas/cursor y scroll (5px), sin refetch, y Mi perfil intacto. Web cubre 320/768/1280px y móvil 390px, en claro y oscuro; se comprueban además búsqueda, contraste, perfil público y cabecera. Lint, formato, build y auditoría correctos en ambos; cero vulnerabilidades. Las capturas esperan a que termine la transición Ionic antes de su revisión. Sin cambios de diseño, temas, API, dependencias, Backend o AdminWeb.
+
 ## Alcance
 
 1. Perfil abierto desde búsqueda móvil: retroceso nativo Ionic en cabecera, sin alterar Mi perfil. Regreso por pila con respaldo /buscar y restauración de consulta enviada, borrador del campo, páginas, cursor y posición cuando el contenido lo permita.

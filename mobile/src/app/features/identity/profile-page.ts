@@ -8,7 +8,6 @@ import { Feedback } from '../../shared/identity/feedback';
 import { IdentityApi, identityError } from '../../core/api/identity-api';
 import { Session } from '../../core/session/session';
 import type { NumericPublicProfile } from '../../core/api/types.gen';
-import { CLIENT_PLATFORM } from '../../shared/identity/client-platform';
 import { SearchReturn } from '../../shared/identity/search-return';
 
 @Component({
@@ -54,11 +53,9 @@ export class ProfilePage extends AccessiblePage {
   private readonly route = inject(ActivatedRoute);
   readonly session = inject(Session);
   readonly publicView = this.route.snapshot.data['publicView'] === true;
-  private readonly platform = inject(CLIENT_PLATFORM);
   private readonly searchReturn = inject(SearchReturn);
   searchBack() {
     return (
-      this.platform === 'mobile' &&
       this.publicView &&
       this.searchReturn.read()?.target === this.route.snapshot.paramMap.get('publicId')
     );
