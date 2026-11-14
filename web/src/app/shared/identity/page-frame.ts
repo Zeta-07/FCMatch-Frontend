@@ -1,4 +1,4 @@
-import { Component, inject, input } from '@angular/core';
+import { Component, inject, input, output, viewChild } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import {
   IonHeader,
@@ -8,6 +8,7 @@ import {
   IonContent,
   IonIcon,
   IonTitle,
+  IonBackButton,
 } from '@ionic/angular';
 import {
   arrowBackOutline,
@@ -32,6 +33,7 @@ import { CLIENT_PLATFORM } from './client-platform';
     IonContent,
     IonIcon,
     IonTitle,
+    IonBackButton,
     BrandLogo,
     ThemeToggle,
     RouterLink,
@@ -40,7 +42,9 @@ import { CLIENT_PLATFORM } from './client-platform';
   template: ` <ion-header class="identity-header"
       ><ion-toolbar>
         <ion-buttons slot="start">
-          @if (back()) {
+          @if (back() && historyBack()) {
+            <ion-back-button [defaultHref]="back()" text="" [icon]="backIcon" aria-label="Volver" />
+          } @else if (back()) {
             <ion-button [routerLink]="back()" aria-label="Volver" fill="clear"
               ><ion-icon slot="icon-only" [icon]="backIcon" aria-hidden="true"
             /></ion-button>
@@ -94,8 +98,17 @@ import { CLIENT_PLATFORM } from './client-platform';
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content role="region" aria-label="Contenido"
-      ><main class="identity-shell" [class.narrow]="narrow()" [class.auth-layout]="authLayout()">
+    <ion-content
+      role="region"
+      aria-label="Contenido"
+      [scrollEvents]="trackScroll()"
+      (ionScroll)="scrollPosition.emit($event.detail.scrollTop)"
+      ><main
+        class="identity-shell"
+        [class.narrow]="narrow()"
+        [class.auth-layout]="authLayout()"
+        [class.mobile-profile-editor]="platform === 'mobile' && profileEditor()"
+      >
         <ng-content /></main
     ></ion-content>`,
   styles: `
@@ -136,6 +149,14 @@ export class PageFrame {
   readonly session = inject(Session);
   readonly platform = inject(CLIENT_PLATFORM);
   readonly back = input('');
+  readonly historyBack = input(false);
+  readonly profileEditor = input(false);
+  readonly trackScroll = input(false);
+  readonly scrollPosition = output<number>();
+  private readonly content = viewChild.required(IonContent);
+  scrollTo(top: number) {
+    return this.content().scrollToPoint(0, top, 0);
+  }
   readonly narrow = input(false);
   readonly publicView = input(false);
   readonly authLayout = input(false);

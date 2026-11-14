@@ -1,5 +1,15 @@
 # Decisiones técnicas — Fase 0
 
+## DT-015 — Regreso desde búsqueda y ancho de Editar perfil móvil
+
+El propietario aprueba el resto de Etapa 6 y solicita únicamente dos remates móviles, sin cierre definitivo ni Etapa 7. El perfil público abierto desde Buscar muestra retroceso Ionic con el mismo icono de Editar perfil. Se usa ion-back-button para volver en la pila de Ionic, con /buscar como destino de respaldo. No se añade retroceso a Mi perfil ni a perfiles abiertos directamente sin procedencia de búsqueda.
+
+La búsqueda guarda una única instantánea de navegación en memoria (consulta enviada y texto editado, resultados acumulados, cursor, estado de búsqueda y scrollTop); nunca localStorage, URL con datos ni nuevas llamadas automáticas. Está vinculada a la revisión de sesión y se limpia al cerrar sesión o abandonar la búsqueda hacia otro destino. Se restaura al regresar, incluso si Ionic recrea la página; scroll después de la transición. Las respuestas tardías de búsquedas abandonadas no sobrescriben el estado restaurado. No cambia API, semántica, límites, permisos o paginación.
+
+Editar perfil utiliza una clase exclusivamente móvil y de modo profile: hasta 48rem aprovecha el ancho completo, con padding horizontal 0.75rem en marco y tarjeta, y margen vertical 0.5rem en tarjeta. No cambia campos, controles, validaciones, botones, temas, colores, tarjetas de Estadísticas/Historial ni otros formularios; Web mantiene su composición. Fuentes canónicas distribuidas por sync-identity a las dos aplicaciones, nunca imports cruzados. Sin cambios de Backend/AdminWeb.
+
+Se mantienen las excepciones aprobadas Angular 22.2.4/TypeScript 6.0.3. El inventario detectó mantenimiento estable de Playwright 1.65.1 y ESLint 10.15.0; se actualizan herramientas dev en commit separado, sin añadir dependencias ni cambiar UI.
+
 ## DT-014 — Ajustes finales aprobados: búsqueda manual única y perfil
 
 El propietario aprueba eliminar el selector Usuario/ID y usar un campo Usuario o ID público; solo submit por Buscar/Enter consulta. Cargar más utiliza una copia de la última consulta enviada, no el valor editado. query se resuelve y pagina íntegramente en Backend DT-016, con compatibilidad de search/publicNumber y cursor anterior. La etiqueta Tú compara publicNumber con el perfil propio disponible en memoria; si falta, se obtiene al enviar, sin búsqueda automática y sin alterar permisos. Los resultados incluyen al titular. Únicamente se elimina Ajustes dentro de Mi perfil; Editar perfil y Ajustes en navegación principal continúan. Las tarjetas Estadísticas e Historial y sus estilos quedan expresamente aprobados e intactos, sin cambios de tamaño/distribución. Pruebas/aceptación y contraste ambos temas antes de publicar. No nuevas pantallas, paleta, dependencias de UI, Etapa 7 ni merge. Modelos actualizados desde OpenAPI; AdminWeb solo sincroniza contrato (DT-013).

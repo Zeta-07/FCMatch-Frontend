@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { disabled, form, FormField, submit, validate } from '@angular/forms/signals';
 import { IonButton, IonList, IonItem, IonLabel } from '@ionic/angular';
@@ -9,6 +9,8 @@ import { Feedback } from '../../shared/identity/feedback';
 import { IdentityApi, identityError } from '../../core/api/identity-api';
 import { Session } from '../../core/session/session';
 import type { NumericPublicProfile } from '../../core/api/types.gen';
+import { CLIENT_PLATFORM } from '../../shared/identity/client-platform';
+import { SearchReturn } from '../../shared/identity/search-return';
 
 @Component({
   imports: [
@@ -25,6 +27,8 @@ import type { NumericPublicProfile } from '../../core/api/types.gen';
   selector: 'app-search-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<fc-page-frame
+    [trackScroll]="platform === 'mobile'"
+    (scrollPosition)="scrollTop = $event"
     ><h1>Buscar usuarios</h1>
     <form class="search-form" (submit)="search($event)" novalidate>
       <fc-text-field
@@ -59,6 +63,8 @@ import type { NumericPublicProfile } from '../../core/api/types.gen';
               slot="end"
               fill="outline"
               [routerLink]="['/usuarios', user.publicNumber]"
+              routerDirection="forward"
+              (click)="remember($event, user.publicNumber)"
               [attr.aria-label]="'Ver perfil de ' + user.username"
               >Ver perfil</ion-button
             >
@@ -72,6 +78,13 @@ import type { NumericPublicProfile } from '../../core/api/types.gen';
   </fc-page-frame>`,
 })
 export class SearchPage extends AccessiblePage {
+  readonly platform = inject(CLIENT_PLATFORM);
+  private readonly searchReturn = inject(SearchReturn);
+  private readonly frame = viewChild.required(PageFrame);
+  private openingProfile = false;
+  private restoreScroll: number | undefined;
+  private requestVersion = 0;
+  scrollTop = 0;
   readonly session = inject(Session);
   private readonly api = inject(IdentityApi);
   private query = '';
@@ -107,17 +120,19 @@ export class SearchPage extends AccessiblePage {
     if (this.busy()) return;
     this.busy.set(true);
     this.error.set('');
+    const requestVersion = ++this.requestVersion;
     try {
       if (!this.session.profile()) {
         const revision = this.session.revision();
         const own = await this.api.own();
-        if (revision !== this.session.revision()) return;
+        if (revision !== this.session.revision() || requestVersion !== this.requestVersion) return;
         this.session.profile.set(own);
       }
       const page = await this.api.search(
         this.query,
         more ? (this.cursor() ?? undefined) : undefined,
       );
+      if (requestVersion !== this.requestVersion) return;
       this.items.update((items) =>
         more
           ? [
@@ -131,15 +146,59 @@ export class SearchPage extends AccessiblePage {
       this.cursor.set(page.nextCursor);
       this.searched.set(true);
     } catch (error) {
-      this.error.set(identityError(error));
+      if (requestVersion === this.requestVersion) this.error.set(identityError(error));
     } finally {
-      this.busy.set(false);
+      if (requestVersion === this.requestVersion) this.busy.set(false);
     }
   }
   more() {
     if (this.cursor()) void this.load(true);
   }
+  remember(event: MouseEvent, target: string) {
+    if (
+      this.platform !== 'mobile' ||
+      event.button !== 0 ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      event.altKey
+    )
+      return;
+    this.openingProfile = true;
+    this.searchReturn.save({
+      target,
+      query: this.query,
+      input: this.model().search,
+      items: this.items(),
+      cursor: this.cursor(),
+      searched: this.searched(),
+      scrollTop: this.scrollTop,
+    });
+  }
+  ionViewWillEnter() {
+    if (this.platform !== 'mobile') return;
+    const snapshot = this.searchReturn.read();
+    if (!snapshot) return;
+    this.query = snapshot.query;
+    this.model.set({ search: snapshot.input });
+    this.items.set(snapshot.items);
+    this.cursor.set(snapshot.cursor);
+    this.searched.set(snapshot.searched);
+    this.restoreScroll = snapshot.scrollTop;
+    this.searchReturn.clear();
+  }
+  override ionViewDidEnter() {
+    super.ionViewDidEnter();
+    if (this.restoreScroll !== undefined) {
+      void this.frame().scrollTo(this.restoreScroll);
+      this.restoreScroll = undefined;
+    }
+  }
   ionViewDidLeave() {
+    ++this.requestVersion;
+    this.busy.set(false);
+    if (this.platform === 'mobile' && !this.openingProfile) this.searchReturn.clear();
+    this.openingProfile = false;
     this.items.set([]);
     this.cursor.set(null);
     this.model.set({ search: '' });

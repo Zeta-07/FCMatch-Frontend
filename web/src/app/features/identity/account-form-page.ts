@@ -23,7 +23,11 @@ import { Session } from '../../core/session/session';
   imports: [PageFrame, TextField, ProfileDetails, Feedback, FormField, IonButton, RouterLink],
   selector: 'app-account-form-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<fc-page-frame [narrow]="true" [back]="mode === 'profile' ? '/perfil' : '/ajustes'">
+  template: `<fc-page-frame
+    [narrow]="true"
+    [profileEditor]="mode === 'profile'"
+    [back]="mode === 'profile' ? '/perfil' : '/ajustes'"
+  >
     <section class="identity-card">
       <h1>{{ title }}</h1>
       <fc-feedback [busy]="loading()" [error]="loadError()" />

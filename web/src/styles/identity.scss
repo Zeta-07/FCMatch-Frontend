@@ -327,6 +327,14 @@ ion-alert .alert-button {
   min-height: 2.75rem;
 }
 @media (width <= 48rem) {
+  .identity-shell.mobile-profile-editor {
+    max-width: 100%;
+    padding-inline: 0.75rem;
+  }
+  .mobile-profile-editor > .identity-card {
+    padding-inline: 0.75rem;
+    margin-block: 0.5rem;
+  }
   .top-nav {
     gap: 0;
     font-size: 0.875rem;
