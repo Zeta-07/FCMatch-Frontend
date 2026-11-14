@@ -55,7 +55,7 @@ test.beforeEach(async ({ context }) => {
     if (url.pathname.endsWith('/login') || url.pathname.endsWith('/refresh')) return send(grant());
     if (url.pathname === '/api/v1/users')
       return send({
-        items: url.searchParams.get('search') === 'zz' ? [] : [profile],
+        items: url.searchParams.get('query') === 'zz' ? [] : [profile],
         nextCursor: null,
       });
     if (
@@ -187,11 +187,11 @@ test('enlace: retira el secreto antes de la configuración, no confirma por GET 
 
 test('búsqueda: vacío, error de red, reintento manual y perfil sin correo', async ({ page }) => {
   await page.goto('/buscar');
-  await field(page, 'Usuario', 'zz');
+  await field(page, 'Usuario o ID público', 'zz');
   await page.getByRole('button', { name: 'Buscar', exact: true }).click();
   await expect(page.getByRole('status')).toHaveText('Sin resultados.');
   await page.route('**/api/v1/users?*', (route) => route.abort());
-  await field(page, 'Usuario', 'Ju');
+  await field(page, 'Usuario o ID público', 'Ju');
   await page.getByRole('button', { name: 'Buscar', exact: true }).click();
   await expect(page.locator('fc-feedback [role="alert"]')).toContainText('No se pudo conectar.');
   await page.unroute('**/api/v1/users?*');
@@ -358,9 +358,9 @@ test('ID numérico: único ID visible, copia, enlace numérico y negociación ex
   await expect(page.getByRole('status')).toHaveText('ID copiado.');
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(publicNumber);
   await page.goto('/buscar');
-  await page.locator('ion-segment-button[value="id"]').click();
-  await field(page, 'ID público', publicNumber);
-  const exact = page.waitForRequest((req) => req.url().includes(`publicNumber=${publicNumber}`));
+  await expect(page.locator('ion-segment')).toHaveCount(0);
+  await field(page, 'Usuario o ID público', publicNumber);
+  const exact = page.waitForRequest((req) => req.url().includes(`query=${publicNumber}`));
   await page.getByRole('button', { name: 'Buscar', exact: true }).click();
   expect(new URL((await exact).url()).searchParams.has('search')).toBe(false);
   await page.getByRole('link', { name: 'Ver perfil de JugadorDemo' }).click();
@@ -368,6 +368,98 @@ test('ID numérico: único ID visible, copia, enlace numérico y negociación ex
   await expect(page.locator('app-profile-page .public-id')).toHaveText(publicNumber);
   await expect(page.locator('app-profile-page main')).not.toContainText(id);
 });
+
+test('búsqueda unificada manual: Enter, Tú y paginación de la consulta enviada', async ({
+  page,
+}) => {
+  const requests: URL[] = [];
+  await page.route('**/api/v1/users?*', async (route) => {
+    const url = new URL(route.request().url());
+    requests.push(url);
+    await route.fulfill({
+      json: {
+        items: [profile],
+        nextCursor: url.searchParams.has('cursor') ? null : 'synthetic-cursor',
+      },
+    });
+  });
+  await page.goto('/buscar');
+  await field(page, 'Usuario o ID público', 'Ju');
+  await page.getByLabel('Usuario o ID público', { exact: true }).press('Tab');
+  expect(requests).toHaveLength(0);
+  await expect(page.locator('ion-segment')).toHaveCount(0);
+  await page.getByLabel('Usuario o ID público', { exact: true }).press('Enter');
+  await expect(page.locator('app-search-page h2')).toHaveText('JugadorDemo · Tú');
+  expect(requests).toHaveLength(1);
+  expect(requests[0].searchParams.get('query')).toBe('Ju');
+  await field(page, 'Usuario o ID público', 'Otro');
+  expect(requests).toHaveLength(1);
+  await page.getByRole('button', { name: 'Cargar más', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Cargar más', exact: true })).toHaveCount(0);
+  expect(requests[1].searchParams.get('query')).toBe('Ju');
+  expect(requests[1].searchParams.get('cursor')).toBe('synthetic-cursor');
+  await expect(page.locator('app-search-page h2')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Buscar', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Cargar más', exact: true })).toBeVisible();
+  expect(requests[2].searchParams.get('query')).toBe('Otro');
+  expect(requests[2].searchParams.has('cursor')).toBe(false);
+  await page.goto('/perfil');
+  await expect(page.locator('app-profile-page .actions')).toHaveText('Editar perfil');
+  await expect(page.locator('app-profile-page .profile-empty h2')).toHaveText([
+    'Estadísticas',
+    'Historial',
+  ]);
+});
+
+for (const theme of ['dark', 'light'])
+  test(`búsqueda: contraste efectivo de controles ${theme}`, async ({ page }) => {
+    await page.addInitScript((value) => localStorage.setItem('fcmatch-theme', value), theme);
+    await page.route('**/api/v1/users?*', (route) =>
+      route.fulfill({ json: { items: [profile], nextCursor: 'synthetic-cursor' } }),
+    );
+    await page.goto('/buscar');
+    await field(page, 'Usuario o ID público', 'Ju');
+    await page.getByRole('button', { name: 'Buscar', exact: true }).click();
+    await expect(page.locator('app-search-page h2')).toContainText('Tú');
+    const controls = page.locator('app-search-page button:visible, app-search-page input:visible');
+    const count = await controls.count();
+    expect(count).toBeGreaterThanOrEqual(3);
+    for (const control of await controls.all()) {
+      const ratio = await control.evaluate((el) => {
+        const lum = (color: string) => {
+          const rgb = color
+            .match(/[\d.]+/g)!
+            .slice(0, 3)
+            .map(Number);
+          const channels = rgb.map((v) =>
+            v / 255 <= 0.04045 ? v / 255 / 12.92 : ((v / 255 + 0.055) / 1.055) ** 2.4,
+          );
+          return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+        };
+        let ancestor: Element | null = el;
+        let background = '';
+        while (ancestor) {
+          const value = getComputedStyle(ancestor).backgroundColor;
+          if (value !== 'rgba(0, 0, 0, 0)' && value !== 'transparent') {
+            background = value;
+            break;
+          }
+          ancestor = ancestor.parentElement ?? (ancestor.getRootNode() as ShadowRoot).host ?? null;
+        }
+        if (!background) {
+          const sample = document.createElement('span');
+          sample.style.color = 'var(--bg-primary)';
+          document.body.append(sample);
+          background = getComputedStyle(sample).color;
+          sample.remove();
+        }
+        const a = lum(getComputedStyle(el).color),
+          b = lum(background);
+        return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+      });
+      expect(ratio).toBeGreaterThanOrEqual(4.5);
+    }
+  });
 
 for (const theme of ['dark', 'light'])
   test(`cabecera y navegación accesibles ${theme}: teclado, estado y reflujo`, async ({ page }) => {

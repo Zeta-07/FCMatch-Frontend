@@ -150,8 +150,9 @@ test.describe('Aceptación con API/PostgreSQL/SMTP/S3 reales', () => {
     await page.getByRole('button', { name: 'Quitar foto', exact: true }).click();
     await expect(page.getByRole('status')).toHaveText('Foto eliminada.');
     await page.goto('/buscar');
-    await fill(page, 'Usuario', username);
+    await fill(page, 'Usuario o ID público', username);
     await page.getByRole('button', { name: 'Buscar', exact: true }).click();
+    await expect(page.locator('app-search-page h2')).toContainText('· Tú');
     await page.getByRole('link', { name: `Ver perfil de ${username}` }).click();
     await expect(page).toHaveURL(new RegExp(`/usuarios/${publicNumber}$`));
     await expect(
@@ -184,9 +185,9 @@ test.describe('Aceptación con API/PostgreSQL/SMTP/S3 reales', () => {
     }
     await guest.close();
     await page.goto('/buscar');
-    await page.locator('ion-segment-button[value="id"]').click();
-    await fill(page, 'ID público', publicNumber);
-    await page.getByRole('button', { name: 'Buscar', exact: true }).click();
+    await fill(page, 'Usuario o ID público', publicNumber);
+    await page.getByLabel('Usuario o ID público', { exact: true }).press('Enter');
+    await expect(page.locator('app-search-page h2')).toContainText('· Tú');
     await page.getByRole('link', { name: `Ver perfil de ${username}` }).click();
     await expect(page.locator('.public-id')).toHaveText(publicNumber);
     await page.goto('/cambiar-correo');

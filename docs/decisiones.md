@@ -1,5 +1,9 @@
 # Decisiones técnicas — Fase 0
 
+## DT-014 — Ajustes finales aprobados: búsqueda manual única y perfil
+
+El propietario aprueba eliminar el selector Usuario/ID y usar un campo Usuario o ID público; solo submit por Buscar/Enter consulta. Cargar más utiliza una copia de la última consulta enviada, no el valor editado. query se resuelve y pagina íntegramente en Backend DT-016, con compatibilidad de search/publicNumber y cursor anterior. La etiqueta Tú compara publicNumber con el perfil propio disponible en memoria; si falta, se obtiene al enviar, sin búsqueda automática y sin alterar permisos. Los resultados incluyen al titular. Únicamente se elimina Ajustes dentro de Mi perfil; Editar perfil y Ajustes en navegación principal continúan. Las tarjetas Estadísticas e Historial y sus estilos quedan expresamente aprobados e intactos, sin cambios de tamaño/distribución. Pruebas/aceptación y contraste ambos temas antes de publicar. No nuevas pantallas, paleta, dependencias de UI, Etapa 7 ni merge. Modelos actualizados desde OpenAPI; AdminWeb solo sincroniza contrato (DT-013).
+
 ## DT-013 — Correcciones REV4 y número público de Etapa 6
 
 Plan aprobado por el propietario, pendiente nueva aprobación visual definitiva. Cabecera compacta, navegación actual con aria-current, botón de acción luna/sol con nombre dinámico y descripción del estado, único en cabecera; se retira Apariencia de Ajustes. Formularios con jerarquía y controles consistentes, recuperación junto a contraseña, acciones secundarias agrupadas; perfil con avatar/identidad y fila compacta para ID/copia, cuenta en filas Ionic y sesiones con cierre global diferenciado/cancelable. Sin eslóganes, sellos ficticios, estadísticas inventadas ni cambios de logo. Web conserva navegación superior y móvil sus pestañas temporales de identidad: no se anticipan módulos.

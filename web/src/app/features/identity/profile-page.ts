@@ -27,8 +27,7 @@ import type { NumericPublicProfile } from '../../core/api/types.gen';
         />
         @if (!publicView) {
           <div class="actions">
-            <ion-button routerLink="/editar-perfil">Editar perfil</ion-button
-            ><ion-button routerLink="/ajustes" fill="outline">Ajustes</ion-button>
+            <ion-button routerLink="/editar-perfil">Editar perfil</ion-button>
           </div>
         }
       </section>

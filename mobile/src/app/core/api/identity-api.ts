@@ -147,12 +147,12 @@ export class IdentityApi {
       ),
     );
   }
-  search(search: string, cursor?: string, byNumber = false) {
+  search(query: string, cursor?: string) {
     return firstValueFrom(
       this.http.get<NumericUsersPage>(`${this.base}/users`, {
         ...this.options(true),
         params: {
-          ...(byNumber ? { publicNumber: search } : { search }),
+          query,
           ...(cursor ? { cursor } : {}),
         },
       }),
