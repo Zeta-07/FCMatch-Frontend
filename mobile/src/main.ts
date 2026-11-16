@@ -2,6 +2,9 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { App } from './app/app';
 import { API_BASE_URL } from './app/core/api/api-base-url';
+import { captureActionLink } from './app/core/session/action-link';
+
+captureActionLink();
 
 async function start() {
   const response = await fetch('config.json', { cache: 'no-store' });

@@ -1,5 +1,9 @@
 # FCMatch Frontend — Fase 0
 
+## Fase 1 — Etapa 1 local
+
+Se reciben los modelos del contrato objetivo de identidad de Backend. No hay pantallas ni autenticación implementadas todavía: las operaciones `planned` no son endpoints disponibles. Usar los tipos de operación (`RegisterUserData['body']`, etc.) para peticiones: el generador separa variantes `Writable` de campos `writeOnly`. Web y móvil en navegador serán la aceptación funcional; Android/iOS y almacenamiento seguro nativo quedan para Fase 11. Políticas y trazabilidad en `FCMatch-Backend/docs/fase-1-identidad.md`, sin imports entre repositorios. Cambios locales pendientes de revisión, sin commits o push.
+
 ## Skills OpenCode compartidas
 
 `opencode.json` carga seis skills revisadas desde un catálogo público de Backend fijado a un commit, tanto en `web/` como en `mobile/`. No requiere copiar archivos ni configurar rutas personales. [Guía canónica, procedencia y política](https://github.com/Zeta-07/FCMatch-Backend/blob/ab1501182f034bde2c248ffea1e7205be8a3f472/docs/skills-opencode.md). La descarga inicial requiere OpenCode V2 y acceso HTTPS a GitHub; no autoriza iniciar Fase 1.
@@ -10,7 +14,7 @@ Dos aplicaciones Angular + Ionic independientes: `web/` y `mobile/`. Cada una ti
 
 ## Ejecutar
 
-Requiere Node.js 26.13.0 LTS y npm 12.2.1. En el espacio de trabajo original, activa herramientas con `. ../tooling/activate.ps1`. Inicia previamente la API y PostgreSQL siguiendo el README del backend.
+Requiere Node.js 26.13.0 LTS y npm 12.2.2. En el espacio de trabajo original, activa herramientas con `. ../tooling/activate.ps1`. Inicia previamente la API y PostgreSQL siguiendo el README del backend.
 
 ```powershell
 npm --prefix web ci
